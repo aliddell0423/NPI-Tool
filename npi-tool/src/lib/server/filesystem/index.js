@@ -1,4 +1,4 @@
-import { readdirSync, existsSync } from 'fs';
+import { readdirSync, existsSync, statSync } from 'fs';
 import { findMostSimilarString } from '$lib/server/utils'
 
  export async function getTabContent(stocknum, directory) {
@@ -6,31 +6,57 @@ import { findMostSimilarString } from '$lib/server/utils'
     return files;
  }
 
- export async function getCCL(customer, assembly) {
+ export async function findCCLFilename(path) {
+  const files = await readdirSync(path)
+  let current_rev = "0";
+  for(let file of files) {
+    let file_name = file.split(".")[0];
+    if(file_name.toLowerCase().includes("rev")) {
+      if(file_name.charAt(file_name.length - 1) > current_rev.charAt(file_name.length - 1)) {
+        current_rev = file;
+      }
+    }
+  }
+
+  return current_rev;
+ }
+
+ export async function getCustomerDir() {
    const path = "V:\\0-Quoting\\0-Quotes\\2016 - Current Quotes & CCL's\\"
    const customers = await readdirSync(path);
-   const likely_customer = findMostSimilarString(customer, customers) + "\\"
-
-   const assemblies = await readdirSync(path + likely_customer);
-   const likely_assembly = findMostSimilarString(assembly, assemblies) + "\\";
-
-   const files = await readdirSync(path + likely_customer + likely_assembly)
-   const likely_ccl = findMostSimilarString("CCL_Rev", files);
-   console.log(likely_ccl);
+   const updated_list = customers.filter(item => item !== "Thumbs.db");
+   const customer_map = updated_list.reduce((acc, value) => {
+    acc[value] = readdirSync(path + value);
+    return acc;
+   }, {});
+   return customer_map;
  }
 
  export async function getScriptsPath(stocknum) {
   if (existsSync("S:\\" + stocknum)) {
-    return await readdirSync("S:\\" + stocknum);
+    return readDirRecursive("S:\\" + stocknum);
   }
   else {
-    return await readdirSync("T:\\" + stocknum);
+    return readDirRecursive("T:\\" + stocknum);
   }
  }
 
- export async function getFiles(dirpath) {
-  if (existsSync(dirpath)) {
-    return await readdirSync(dirpath);
+
+
+export async function getFiles(path) {
+  return readDirRecursive(path);
+}
+
+function readDirRecursive(path) {
+  const stats = statSync(path);
+  if (stats.isDirectory()) {
+    const obj = {};
+    const files = readdirSync(path);
+    files.forEach((file) => {
+      obj[file] = readDirRecursive(path + '/' + file);
+    });
+    return obj;
+  } else {
+    return null;
   }
-  return null;
- }
+}

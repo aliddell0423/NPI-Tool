@@ -1,11 +1,11 @@
 /** @type {import('./$types').PageLoad} */
 import {getOrderColumns, getAssignedOrders} from "$lib/server/db"
 
-export async function load({ params, locals }) {
+export async function load({ locals }) {
 
-    const { roles, email } = locals;
+    const { email } = locals;
     let columns = await getOrderColumns();
     const rows = await getAssignedOrders(email);
 
-    return { roles, email, rows, columns };
+    return { email, rows, columns };
 }

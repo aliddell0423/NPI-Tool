@@ -36,6 +36,7 @@
 		"aws-sdk": "^2.1363.0",
 		"bcrypt": "^5.1.0",
 		"classnames": "^2.3.2",
+		"exceljs": "^4.3.0",
 		"flowbite": "^1.6.5",
 		"flowbite-svelte": "^0.34.9",
 		"mock-aws-s3": "^4.0.2",

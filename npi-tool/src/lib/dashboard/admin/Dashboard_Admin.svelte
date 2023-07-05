@@ -2,7 +2,7 @@
 <script>
   import Checkbox from "./Checkbox.svelte";
   import { selectedOptions } from "./dashboard_buffer.js"
-  import "$lib/dashboard/dashboard.css";
+  import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
 
   export let rows, columns, options;
   let editingCell = null;
@@ -29,19 +29,19 @@
   }
 </script>
 
-<table>
-  <thead>
-    <tr>
+<Table striped={true}>
+  <TableHead>
       {#each columns as header}
-        <th>{header}</th>
+        <TableHeadCell>
+          {header}
+        </TableHeadCell>
       {/each}
-    </tr>
-  </thead>
-  <tbody>
+  </TableHead>
+  <TableBody>
     {#each rows as row, rowIndex}
-      <tr>
+      <TableBodyRow>
         {#each row as cellValue, columnIndex}
-          <td on:click={() => startEditing(rowIndex, columnIndex)} class:assigned_eng_column="{columnIndex === row.length - 1}">
+          <TableBodyCell on:click={() => startEditing(rowIndex, columnIndex)}>
             {#if editingCell && editingCell.row === rowIndex && 
                                       editingCell.column === columnIndex}
               {#if columnIndex === row.length - 1}
@@ -57,15 +57,9 @@
             {:else}
               {cellValue}
             {/if}
-          </td>
+              </TableBodyCell>
         {/each}
-      </tr>
+        </TableBodyRow>
     {/each}
-  </tbody>
-</table>
-
-<style>
-  .assigned_eng_column {
-    width: 650px;
-  }
-</style>
+  </TableBody>
+</Table>

@@ -5,9 +5,7 @@
 
   export let data;
 
-  const { files_dict } = data;
-
-  console.log(files_dict);
+  const { files_dict, customers, ccl_path } = data;
   
   let tabs = [];
   for (const dir of Object.getOwnPropertyNames(files_dict)) {
@@ -16,14 +14,7 @@
       content: files_dict[dir]
     });
   }
-
-  function addTab() {
-    tabs = [...tabs, {
-      title: `Tab ${tabs.length + 1}`,
-    }];
-  }
 </script>
 
-<TabbedInterface {tabs} />
-<button on:click={addTab}>Add Tab</button>
+<TabbedInterface {tabs} {customers} {ccl_path}/>
 <button><a href="../">Go back</a></button>

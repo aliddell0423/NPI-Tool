@@ -8,7 +8,7 @@ export const handle = (async ({ event, resolve }) => {
     let sessionFound = false;
     const sid = cookies.get('sid');
 
-    const rolePath = event.url.pathname.split('/')[1];
+    const emailPath = event.url.pathname.split('/')[1];
     
     if (sid) {
         const session = getSession(sid);
@@ -17,14 +17,21 @@ export const handle = (async ({ event, resolve }) => {
             event.locals.roles = session.roles;
             sessionFound = true;
 
-            if (session.roles != rolePath && rolePath != 'logout') {
-                throw redirect(303, `/${session.roles}`)
+            if( session.roles === "user") {
+                if (session.email != emailPath && emailPath != 'logout' && emailPath != 'api') {
+                    throw redirect(303, `/${session.email}`)
+                }
+            }
+            else if( session.roles === "admin" ) {
+                if (session.roles != emailPath && emailPath != 'logout' && emailPath != 'api') {
+                    throw redirect(303, `/${session.roles}`)
+                }
             }
         }
     }
     
 
-    if (!sessionFound && rolePath !== 'login' && rolePath != 'register' && rolePath != 'api') {
+    if (!sessionFound && emailPath !== 'login' && emailPath != 'register' && emailPath != 'notif-api') {
         throw redirect(303, '/login');
     }
 

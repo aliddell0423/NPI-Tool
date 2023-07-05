@@ -1,5 +1,6 @@
 import Database from 'better-sqlite3';
 import { DB_PATH } from '$env/static/private';
+import { createNotification } from '$lib/notifications';
 import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -232,9 +233,11 @@ export async function commitAssignments(rows) {
 
     for (const email of inserts) {
       makeEngineerAssignment(email, work_order);
+      createNotification(`You have been assigned to WO: ${work_order}`, email);
     }
     for (const email of deletes) {
       removeAssignedEngineer(email, work_order);
+      createNotification(`You have removed from the assigned WO: ${work_order}`, email);
     }
   }
 }
@@ -284,6 +287,21 @@ export async function getAssignedOrders(email) {
   const result = stmnt.all({ email });
   const dataArray = result.map(dict => Object.values(dict));
   return dataArray;
+}
+
+export async function get_ccl_path(stock_number) {
+  const stmnt = db.prepare('select path from ccl_path where stock_number = $stock_number');
+
+  const result = stmnt.get({ stock_number });
+
+  return result;
+}
+
+export async function updateCCLPath(path, stock_number) {
+  const stmt = db.prepare('INSERT INTO ccl_path (stock_number, path) VALUES ($stock_number, $path)');
+
+
+  stmt.run( {stock_number, path} );
 }
 
 

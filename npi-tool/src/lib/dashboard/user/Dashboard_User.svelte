@@ -1,33 +1,21 @@
 <script>
   export let rows, columns;
-  import '$lib/dashboard/dashboard.css'
+  import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
 </script>
 
-<div class="spreadsheet-container">
-<table >
-  <thead >
-    <tr >
+<Table striped={true}>
+  <TableHead>
       {#each columns as column}
-        <th>{column}</th>
+        <TableHeadCell>{column}</TableHeadCell>
       {/each}
-    </tr>
-  </thead>
-  <tbody >
+  </TableHead>
+  <TableBody>
     {#each rows as row, rowIndex}
-      <tr>
+      <TableBodyRow>
         {#each row as cell}
-          <td class:assigned_eng_column="{rowIndex === row.length-1}">{cell}</td>
+          <TableBodyCell>{cell}</TableBodyCell>
         {/each}
-      </tr>
+      </TableBodyRow>
     {/each}
-  </tbody>
-</table>
-</div>
-
-
-<style>
-  .assigned_eng_column {
-    max-width: 650px;
-  }
-/* Style the table */
-</style>
+    </TableBody>
+</Table>

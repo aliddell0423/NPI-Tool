@@ -1,11 +1,8 @@
 /** @type {import('./$types').PageLoad} */
-/** @type {import('./$types').Actions} */
-/** @type {import('./$types').RequestHandler} */
-import { getUser, getOrderColumns, getOrders, commitTable, commitAssignments, getEngNames, getAssignedEngineers, getFullNameList} from '$lib/server/db';
-import { countBusinessDays } from '$lib/server/dates';
+import { getUser, getOrderColumns, getOrders, getFullNameList, getAssignedEngineers } from '$lib/server/db';
+import { countBusinessDays } from '$lib/server/dates'
 
 export async function load({ locals }) {
-
 
 	const row_ref = {
 		organization: 0,
@@ -26,16 +23,12 @@ export async function load({ locals }) {
 		assigned_engineers: 15
 	}
 
-	const { roles, email } = locals
-
-	const userInfo = getUser(email);
-
-	const { first_name, last_name } = userInfo;
+	const { email } = locals;
 
 	let orderColumns = await getOrderColumns();
+	const orders = await getOrders();
 	orderColumns.push("Assigned Engineers");
 
-	const orders = await getOrders();
 
 	for( const order of orders ) {
 		const result = (await getFullNameList(await getAssignedEngineers(order[5]))).join(", ")
@@ -48,19 +41,12 @@ export async function load({ locals }) {
 		const working_days = await countBusinessDays(order[row_ref['start_date']], order[row_ref['completion_date']]);
 
 		order[row_ref['working_days']] = working_days;
+
+		order[row_ref['days_remaining']] === -1 ? order[row_ref['days_remaining']] = "LATE": order[row_ref['days_remaining']];
+
+		order[row_ref['days_remaining']] === 0 ? order[row_ref['days_remaining']] = "DUE TODAY": order[row_ref['days_remaining']];
 	}
 
-	const names = await getEngNames();
 
-	return { roles, email, first_name, last_name, orderColumns, orders, names};
+	return { orderColumns, orders, email };
 }
-
-export const actions = {
-  pushTableChanges: async ({ request }) => {
-	const data = await request.formData();
-	const rows = JSON.parse(data.get('rows'));
-
-	commitTable(rows)
-	commitAssignments(rows)
-  }
-};
