@@ -1,21 +1,33 @@
 <script>
-  export let rows, columns;
-  import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
+  import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, List, Li } from 'flowbite-svelte';
+  export let tableData, assignmentData, engineer_dict;
 </script>
 
-<Table striped={true}>
-  <TableHead>
-      {#each columns as column}
-        <TableHeadCell>{column}</TableHeadCell>
-      {/each}
-  </TableHead>
-  <TableBody>
-    {#each rows as row, rowIndex}
+  <Table>
+    <TableHead>
+      { #each Object.keys(tableData[0]) as column }
+        <TableHeadCell>{column.replace(/_/g, " ")}</TableHeadCell>
+      { /each }
+      <TableHeadCell>
+        Assigned Engineers
+      </TableHeadCell>
+    </TableHead>
+    <TableBody>
+      {#each tableData as order}
       <TableBodyRow>
-        {#each row as cell}
-          <TableBodyCell>{cell}</TableBodyCell>
-        {/each}
+        {#each Object.keys(tableData[0]) as column }
+          <TableBodyCell>
+              {order[column]}
+          </TableBodyCell>
+        { /each }
+        <List list="none" class="py-4">
+            {#each assignmentData[order["work_order"]] as email}
+              <Li>
+                {engineer_dict[email["engineer_email"]]}
+              </Li>
+            {/each}
+        </List>
       </TableBodyRow>
-    {/each}
+      {/each}
     </TableBody>
-</Table>
+  </Table>

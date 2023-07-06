@@ -1,65 +1,107 @@
 <!-- EditableSpreadsheet.svelte -->
 <script>
-  import Checkbox from "./Checkbox.svelte";
-  import { selectedOptions } from "./dashboard_buffer.js"
-  import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
+  import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Input, Button, List, Li, Checkbox, Listgroup } from 'flowbite-svelte';
 
-  export let rows, columns, options;
-  let editingCell = null;
+  export let tableData, assignmentData, engineer_dict;
+  let editMode = false;
+  let editSelection = false;
+  let selectionList = [];
+  let currentlySelected;
 
- function startEditing(row, column) {
-    editingCell = { row, column };
+
+
+   export async function confirmChanges() {
+    editMode = false;
+    const response = await fetch('/api/orders', {
+      method: 'PUT',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ tableData, assignmentData }),
+    });
+    
   }
 
-  function stopEditing() {
-    editingCell = null;
+  export function editAssignments(work_order) {
+    if(!editSelection){
+      for(const obj of assignmentData[work_order]) {
+        selectionList.push(obj["engineer_email"]);
+      }
+      editSelection = true;
+      currentlySelected = work_order;
+    }
   }
 
-  function confirmEngineers() {
-    const { row, column } = editingCell;
-    rows[row][column] = $selectedOptions.join(", ");
-    stopEditing();
+  export function confirmAssignments() {
+    const newAssignList = [];
+    for(const email of selectionList) {
+      const obj = {"engineer_email": email};
+      newAssignList.push(obj);
+    }
+
+    assignmentData[currentlySelected] = newAssignList;
+    editSelection = false;
+    currentlySelected = null;
+    selectionList = [];
   }
 
-  function onInput(event) {
-    const { value } = event.target;
-    const { row, column } = editingCell;
-
-    rows[row][column] = value;
-  }
 </script>
 
-<Table striped={true}>
-  <TableHead>
-      {#each columns as header}
-        <TableHeadCell>
-          {header}
-        </TableHeadCell>
-      {/each}
-  </TableHead>
-  <TableBody>
-    {#each rows as row, rowIndex}
+<div class="overflow-x-auto max-w-full">
+  <Table>
+    <TableHead>
+      { #each Object.keys(tableData[0]) as column }
+        <TableHeadCell>{column.replace(/_/g, " ")}</TableHeadCell>
+      { /each }
+      <TableHeadCell>
+        Assigned Engineers
+      </TableHeadCell>
+    </TableHead>
+    <TableBody>
+      {#each tableData as order}
       <TableBodyRow>
-        {#each row as cellValue, columnIndex}
-          <TableBodyCell on:click={() => startEditing(rowIndex, columnIndex)}>
-            {#if editingCell && editingCell.row === rowIndex && 
-                                      editingCell.column === columnIndex}
-              {#if columnIndex === row.length - 1}
-                <div style="display:flex;">
-                  <Checkbox {options} checkedList={row[row.length-1]}/>
-                  <button type="button" on:click={confirmEngineers}>Confirm</button>
-                </div>
-              {:else}
-              <input type="text" value={cellValue} on:input={onInput} /> 
-              {/if}
-            {:else if !cellValue && cellValue !== 0}
-              None
+        {#each Object.keys(tableData[0]) as column }
+          <TableBodyCell>
+            {#if editMode}
+              <Input type="text" bind:value={order[column]}/>
             {:else}
-              {cellValue}
+              {order[column]}
             {/if}
-              </TableBodyCell>
-        {/each}
-        </TableBodyRow>
-    {/each}
-  </TableBody>
-</Table>
+          </TableBodyCell>
+        { /each }
+        <List list="none" class="py-4">
+            {#each assignmentData[order["work_order"]] as email}
+              {#if editMode}
+                <p class="cursor-pointer" on:click={() => editAssignments(order["work_order"])}>{engineer_dict[email["engineer_email"]]}</p> 
+              {:else}
+                <Li>
+                  {engineer_dict[email["engineer_email"]]}
+                </Li>
+              {/if}
+            {/each}
+        </List>
+      </TableBodyRow>
+      {/each}
+    </TableBody>
+  </Table>
+</div>
+
+{#if !editSelection}
+  {#if editMode}
+    <Button on:click={confirmChanges}>Confirm Changes</Button>
+  {:else}
+    <div class="flex flex-row space-x-6 p-x-4">
+      <Button on:click={() => editMode = !editMode}>Edit Table</Button>
+      <Button>Add Order</Button>
+    </div>
+  {/if}
+{/if}
+
+{#if editSelection}
+  <div class="w-60 overflow-y-auto h-40">
+    <Listgroup items={Object.keys(engineer_dict)} let:item>
+      <Checkbox bind:group={selectionList} value={item}>{engineer_dict[item]}</Checkbox>
+    </Listgroup>
+  </div>
+  <Button on:click={confirmAssignments}>Confirm Assignments</Button>
+{/if}

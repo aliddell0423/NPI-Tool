@@ -56,6 +56,34 @@ export async function getHolidays() {
   return result;
 }
 
+export async function addTimeOff(startDate, endDate, engineer) {
+  const stmnt = db.prepare(
+    'insert into time_off (start_date, end_date, engineer) values ($startDate, $endDate, $engineer)'
+  )
+
+  stmnt.run({startDate, endDate, engineer});
+}
+
+export async function getTimeOff(email) {
+  const stmnt = db.prepare(
+    'select * from time_off where engineer = $email'
+  )
+
+  const result = stmnt.all({ email });
+  return result;
+}
+
+export async function deleteTimeOff(selected) {
+  let stmnt;
+  for( const id of selected ) {
+    stmnt = db.prepare(
+      'delete from time_off where id = $id'
+    );
+
+    stmnt.run({ id });
+  }
+}
+
 export function isValidDate(dateString) {
 const regex = /^(\d{1,2})\/(\d{1,2})$/;
 
@@ -74,4 +102,27 @@ if (testDate.getMonth() !== month - 1) {
 }
 
 return true; // Valid date
+}
+
+export function isValidFullDate(dateString) {
+  const dateParts = dateString.split('/');
+  const month = parseInt(dateParts[0], 10);
+  const day = parseInt(dateParts[1], 10);
+  const year = parseInt(dateParts[2], 10);
+
+  const date = new Date(year, month - 1, day);
+
+  // Check if the parsed date is a valid date
+  return (
+    date.getMonth() === month - 1 &&
+    date.getDate() === day &&
+    date.getFullYear() === year
+  );
+}
+
+export function isValidDateRange(startDateString, endDateString) {
+  const startDate = new Date(startDateString);
+  const endDate = new Date(endDateString);
+
+  return startDate < endDate;
 }

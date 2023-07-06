@@ -1,28 +1,31 @@
 <script>
-  import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
-  export let rows, columns;
+  import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Button } from 'flowbite-svelte';
+  export let tableData;
+  
+  export function gotoLink(stocknum) {
+    window.location.href = window.location.href + `/${stocknum}`;
+  }
+
 </script>
 
-<Table striped={true}>
+  <Table>
     <TableHead>
-        {#each columns as column}
-          <TableHeadCell>{column}</TableHeadCell>
-        {/each}
+      { #each Object.keys(tableData[0]) as column }
+        <TableHeadCell>{column.replace(/_/g, " ")}</TableHeadCell>
+      { /each }
     </TableHead>
     <TableBody>
-      {#each rows as row}
-        <TableBodyRow>
-          {#each row as cell}
-            <TableBodyCell>
-              {cell}
-            </TableBodyCell>
-          {/each}
+      {#each tableData as order}
+      <TableBodyRow>
+        {#each Object.keys(tableData[0]) as column }
           <TableBodyCell>
-            <a href="orders/{row[13]}" class="font-medium text-blue-600 hover:underline dark:text-blue-500">
-              Edit
-            </a>
+              {order[column]}
           </TableBodyCell>
-        </TableBodyRow>
+        { /each }
+        <TableBodyCell>
+          <Button on:click={() => gotoLink(order.stock_number)}>Edit</Button>
+        </TableBodyCell>
+      </TableBodyRow>
       {/each}
     </TableBody>
-</Table>
+  </Table>

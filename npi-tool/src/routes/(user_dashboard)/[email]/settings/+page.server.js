@@ -1,8 +1,9 @@
 /** @type {import('./$types').PageLoad} */
-import { getHolidays } from '$lib/server/dates';
+import { getTimeOff } from '$lib/server/dates';
 
-export async function load() {
-    const holidays = await getHolidays();
+export async function load({ locals }) {
+    const { email } = locals;
+    const time_off = getTimeOff(email);
 
-    return { holidays };
+    return { email, time_off };
 }

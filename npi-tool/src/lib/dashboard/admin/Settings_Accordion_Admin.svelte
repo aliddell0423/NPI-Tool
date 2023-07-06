@@ -25,9 +25,7 @@
             submissionError = true;
         }
 
-
         submittedHoliday = ''
-
     }
 </script>
 
