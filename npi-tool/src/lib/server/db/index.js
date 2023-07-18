@@ -200,3 +200,36 @@ export async function commitTable(data) {
   }
 
 }
+
+export async function addOrder(order) {
+
+  const stmt = db.prepare('insert into orders ('
+    + 'organization, '
+    + 'type, '
+    + 'customer_name, '
+    + 'assembly, '
+    + 'sales_order, '
+    + 'order_quantity, '
+    + 'region, '
+    + 'start_date, '
+    + 'est_complete_date, '
+    + 'stock_number, '
+    + 'solutions_architect, '
+    + 'work_order) '
+    + 'values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+
+  stmt.run(
+    order.organization,
+    order.type,
+    order.customer_name,
+    order.assembly,
+    order.sales_order,
+    order.order_quantity,
+    order.region,
+    order.start_date,
+    order.est_complete_date,
+    order.stock_number,
+    order.solutions_architect,
+    order.work_order
+  );
+}

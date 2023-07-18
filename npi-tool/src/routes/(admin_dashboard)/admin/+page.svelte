@@ -3,9 +3,9 @@
     import Spreadsheet from '$lib/dashboard/admin/Dashboard_Admin.svelte';
     
     export let data;
-    let { tableData, assignmentData, engineer_dict } = data;
+    let { tableData, assignmentData, engineer_dict, adminEmail } = data;
 </script>
 
-<Spreadsheet {tableData} {assignmentData} {engineer_dict} />
+<Spreadsheet {tableData} {assignmentData} {engineer_dict} {adminEmail} />
 
 

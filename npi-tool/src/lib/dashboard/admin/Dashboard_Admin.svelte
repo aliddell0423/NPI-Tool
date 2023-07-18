@@ -1,12 +1,14 @@
 <!-- EditableSpreadsheet.svelte -->
 <script>
-  import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Input, Button, List, Li, Checkbox, Listgroup } from 'flowbite-svelte';
+  import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Input, Button, List, Li, Checkbox, Listgroup, Alert } from 'flowbite-svelte';
+  import { fly } from 'svelte/transition';
+  import OrderModal from '$lib/dashboard/admin/New_Order_Modal.svelte'
 
-  export let tableData, assignmentData, engineer_dict;
+  export let tableData, assignmentData, engineer_dict, adminEmail;
   let editMode = false;
   let editSelection = false;
   let selectionList = [];
-  let currentlySelected;
+  let currentlySelected, submissionError, errorMessage;
 
 
 
@@ -17,8 +19,13 @@
       headers: {
           'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ tableData, assignmentData }),
+      body: JSON.stringify({ tableData, assignmentData, adminEmail }),
     });
+
+    submissionError = !response.ok;
+    if(submissionError) {
+      errorMessage = await response.text();
+    }
     
   }
 
@@ -47,44 +54,50 @@
 
 </script>
 
-<div class="overflow-x-auto max-w-full">
-  <Table>
-    <TableHead>
-      { #each Object.keys(tableData[0]) as column }
-        <TableHeadCell>{column.replace(/_/g, " ")}</TableHeadCell>
-      { /each }
-      <TableHeadCell>
-        Assigned Engineers
-      </TableHeadCell>
-    </TableHead>
-    <TableBody>
-      {#each tableData as order}
-      <TableBodyRow>
-        {#each Object.keys(tableData[0]) as column }
-          <TableBodyCell>
-            {#if editMode}
-              <Input type="text" bind:value={order[column]}/>
-            {:else}
-              {order[column]}
-            {/if}
-          </TableBodyCell>
+  {#if submissionError}
+    <Alert color="red" dismissable transition={fly}>
+      <span class="font-medium">Submission Error: </span> {errorMessage}
+    </Alert>
+  {/if}
+
+  <div class="min-w-full">
+    <Table class="!min-w-full" shadow>
+      <TableHead>
+        { #each Object.keys(tableData[0]) as column }
+          <TableHeadCell class="px-3 py-2">{column.replace(/_/g, " ")}</TableHeadCell>
         { /each }
-        <List list="none" class="py-4">
-            {#each assignmentData[order["work_order"]] as email}
+        <TableHeadCell>
+          Assigned Engineers
+        </TableHeadCell>
+      </TableHead>
+      <TableBody>
+        {#each tableData as order}
+        <TableBodyRow class="divide-y-2 divide-x-2">
+          {#each Object.keys(tableData[0]) as column }
+            <TableBodyCell class="!px-2 !py-1 !whitespace-normal">
               {#if editMode}
-                <p class="cursor-pointer" on:click={() => editAssignments(order["work_order"])}>{engineer_dict[email["engineer_email"]]}</p> 
+                <Input type="text" bind:value={order[column]}/>
               {:else}
-                <Li>
-                  {engineer_dict[email["engineer_email"]]}
-                </Li>
+                {order[column] === -1 ? "LATE": order[column]}
               {/if}
-            {/each}
-        </List>
-      </TableBodyRow>
-      {/each}
-    </TableBody>
-  </Table>
-</div>
+            </TableBodyCell>
+          { /each }
+          <List list="none" class="py-4">
+              {#each assignmentData[order["work_order"]] as email}
+                {#if editMode}
+                  <p class="cursor-pointer" on:click={() => editAssignments(order["work_order"])}>{engineer_dict[email["engineer_email"]]}</p> 
+                {:else}
+                  <Li>
+                    {engineer_dict[email["engineer_email"]]}
+                  </Li>
+                {/if}
+              {/each}
+          </List>
+        </TableBodyRow>
+        {/each}
+      </TableBody>
+    </Table>
+  </div>
 
 {#if !editSelection}
   {#if editMode}
@@ -92,8 +105,8 @@
   {:else}
     <div class="flex flex-row space-x-6 p-x-4">
       <Button on:click={() => editMode = !editMode}>Edit Table</Button>
-      <Button>Add Order</Button>
     </div>
+    <OrderModal/>
   {/if}
 {/if}
 

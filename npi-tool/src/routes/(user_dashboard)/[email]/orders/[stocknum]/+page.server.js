@@ -26,19 +26,3 @@ export async function load({ params }) {
 
     return { files_dict, customers, ccl_path };
 }
-
-export const actions = {
-    postCCL: async ({request, cookies, params}) => {
-        const data = await request.formData();
-        const customer = data.get('Customer')?.toString()
-        const build = data.get('Build')?.toString()
-        
-        let path = "\\\\tscphxprod\\SHARED\\0-Quoting\\0-Quotes\\2016 - Current Quotes & CCL's\\" + customer + "\\" + build;
-        const ccl_filename = await findCCLFilename(path);
-        path = path + "\\" + ccl_filename;
-        
-        const { stocknum } = params;
-
-        updateCCLPath(path, stocknum);
-    }
-};

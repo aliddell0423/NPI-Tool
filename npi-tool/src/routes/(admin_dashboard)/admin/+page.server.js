@@ -4,9 +4,10 @@
 import { getOrders, getAssignedEngineers, getEngineerDict} from '$lib/server/db';
 import { countBusinessDays } from '$lib/server/dates';
 
-export async function load() {
+export async function load({ locals }) {
 
 	const orders = await getOrders();
+	const adminEmail = locals.email
 
 	const tableData = [];
 	const assignmentData = {};
@@ -28,5 +29,13 @@ export async function load() {
 	}
 
 
-	return { tableData, assignmentData, engineer_dict };
+	return { tableData, assignmentData, engineer_dict, adminEmail };
+}
+
+export const actions = {
+    addOrderPost: async ({request}) => {
+		const data = await request.formData();
+		console.log(data);
+
+	}
 }

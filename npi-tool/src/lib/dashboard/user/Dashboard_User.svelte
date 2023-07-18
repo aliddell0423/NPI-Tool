@@ -3,8 +3,9 @@
   export let tableData, assignmentData, engineer_dict;
 </script>
 
-  <Table>
-    <TableHead>
+<div class="w-min-full">
+  <Table class="w-min-full" shadow>
+    <TableHead class="px-3 py-2">
       { #each Object.keys(tableData[0]) as column }
         <TableHeadCell>{column.replace(/_/g, " ")}</TableHeadCell>
       { /each }
@@ -14,9 +15,9 @@
     </TableHead>
     <TableBody>
       {#each tableData as order}
-      <TableBodyRow>
+      <TableBodyRow class="divide-y-2 divide-x-2">
         {#each Object.keys(tableData[0]) as column }
-          <TableBodyCell>
+          <TableBodyCell class="!px-2 !py-1 !whitespace-normal">
               {order[column]}
           </TableBodyCell>
         { /each }
@@ -31,3 +32,4 @@
       {/each}
     </TableBody>
   </Table>
+</div>

@@ -28,21 +28,21 @@
     </div>
 </div>
 
-<div class="flex max-w-30">
-<Table>
-  <TableHead>
-    <TableHeadCell>Recipient</TableHeadCell>
-    <TableHeadCell>Content</TableHeadCell>
-    <TableHeadCell>Acknowledged</TableHeadCell>
-  </TableHead>
-  <TableBody class="divide-y">
-    {#each filtteredResults as notif}
-    <TableBodyRow>
-      <TableBodyCell>{notif.recipient}</TableBodyCell>
-      <TableBodyCell>{notif.content}</TableBodyCell>
-      <TableBodyCell>{notif.read ? "yes" : "no"}</TableBodyCell>
-    </TableBodyRow>
-    {/each}
-  </TableBody>
-</Table>
+<div style="overflow-y: auto; max-width: 850px; max-height: 300px;">
+  <Table divClass="">
+    <TableHead>
+      <TableHeadCell>Recipient</TableHeadCell>
+      <TableHeadCell>Content</TableHeadCell>
+      <TableHeadCell>Acknowledged</TableHeadCell>
+    </TableHead>
+    <TableBody class="divide-y h-150 !overflow-x-auto">
+      {#each filtteredResults as notif}
+      <TableBodyRow>
+        <TableBodyCell>{notif.recipient}</TableBodyCell>
+        <TableBodyCell tdClass="whitespace-normal">{notif.content}</TableBodyCell>
+        <TableBodyCell>{notif.read ? "yes" : "no"}</TableBodyCell>
+      </TableBodyRow>
+      {/each}
+    </TableBody>
+  </Table>
 </div>
