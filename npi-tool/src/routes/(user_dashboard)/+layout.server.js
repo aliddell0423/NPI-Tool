@@ -1,4 +1,5 @@
 /** @type {import('./$types').PageLoad} */
+
 import { getUser } from '$lib/server/db';
 import { getNotifications } from '$lib/notifications';
 
@@ -14,3 +15,4 @@ export async function load({locals}) {
 
     return { roles, email, first_name, last_name, notifications };
 }
+
