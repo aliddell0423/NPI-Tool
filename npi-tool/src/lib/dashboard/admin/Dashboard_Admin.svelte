@@ -83,6 +83,7 @@
             </TableBodyCell>
           { /each }
           <List list="none" class="py-4">
+            {#if assignmentData[order["work_order"]].length}
               {#each assignmentData[order["work_order"]] as email}
                 {#if editMode}
                   <p class="cursor-pointer" on:click={() => editAssignments(order["work_order"])}>{engineer_dict[email["engineer_email"]]}</p> 
@@ -92,6 +93,13 @@
                   </Li>
                 {/if}
               {/each}
+            {:else}
+              {#if editMode}
+                <p class="cursor-pointer" on:click={() => editAssignments(order["work_order"])}>TBD</p>
+              {:else}
+                <p>TBD</p>
+              {/if}
+            {/if}
           </List>
         </TableBodyRow>
         {/each}

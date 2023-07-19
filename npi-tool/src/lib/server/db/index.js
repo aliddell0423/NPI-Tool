@@ -97,7 +97,10 @@ export function deleteSession(sid) {
 
 export async function getOrders() {
   const stmnt = db.prepare(
-    'select * from orders'
+    `select organization, type, customer_name, 
+    assembly, sales_order, work_order, order_quantity, region, 
+    start_date, est_complete_date, comments, stock_number, 
+    solutions_architect from orders where build_status not like '%PILOT%'`
   );
 
   const result = stmnt.all();
@@ -105,31 +108,42 @@ export async function getOrders() {
   return result;
 }
 
-export async function getAssignedOrders(email) {
-  const stmnt = db.prepare('select orders.* from orders '
-     + 'join engineer_orders on orders.work_order = engineer_orders.work_order '
-     + 'where engineer_orders.engineer_email = $email')
+export async function getAssignedOrders(email, status) {
 
-  const result = stmnt.all({ email });
+  const stmnt = db.prepare(`select  organization, type, customer_name, 
+    assembly, sales_order, work_order, order_quantity, region, 
+    start_date, est_complete_date, comments, stock_number, 
+    solutions_architect from orders
+    join engineer_orders on orders.work_order = engineer_orders.engineer_work_order and orders.build_status like $status 
+    where engineer_orders.engineer_email = $email`)
+
+  const result = stmnt.all({ status: `%${status}%`, email });
   return result;
 }
 
-export async function removeAssignedEngineer(engineer_email, work_order) {
-  const stmnt = db.prepare("delete from engineer_orders where engineer_email = $engineer_email and work_order = $work_order");
-  stmnt.run({engineer_email, work_order});
-  console.log(`removed ${engineer_email} from work order ${work_order}`)
+export async function changeOrderStatus(work_order, status) {
+  const stmnt = db.prepare(`update orders set build_status = $status 
+                            where work_order = $work_order`);
+
+  stmnt.run({ status, work_order });
 }
 
-export async function makeEngineerAssignment(engineer_email, work_order) {
-  const stmnt = db.prepare("insert into engineer_orders (engineer_email, work_order) values ($engineer_email, $work_order)");
-  stmnt.run({engineer_email, work_order});
-  console.log(`assigned ${engineer_email} to work order ${work_order}`)
+export async function removeAssignedEngineer(engineer_email, engineer_work_order) {
+  const stmnt = db.prepare("delete from engineer_orders where engineer_email = $engineer_email and engineer_work_order = $engineer_work_order");
+  stmnt.run({engineer_email, engineer_work_order});
+  console.log(`removed ${engineer_email} from work order ${engineer_work_order}`)
 }
 
-export async function getAssignedEngineers(work_order) {
-  const stmnt = db.prepare('select engineer_email from engineer_orders where work_order = $work_order')
+export async function makeEngineerAssignment(engineer_email, engineer_work_order) {
+  const stmnt = db.prepare("insert into engineer_orders (engineer_email, engineer_work_order) values ($engineer_email, $engineer_work_order)");
+  stmnt.run({engineer_email, engineer_work_order});
+  console.log(`assigned ${engineer_email} to work order ${engineer_work_order}`)
+}
 
-  const result = stmnt.all({ work_order });
+export async function getAssignedEngineers(engineer_work_order) {
+  const stmnt = db.prepare('select engineer_email from engineer_orders where engineer_work_order = $engineer_work_order')
+
+  const result = stmnt.all({ engineer_work_order });
   return result;
 }
 

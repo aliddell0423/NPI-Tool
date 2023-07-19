@@ -29,7 +29,12 @@
     <div style="max-height: 500px;" class="overflow-y-scroll">
       {#if directoryStack.length > 0}
         <div class="mb-6">
-          <Button on:click={ascendDirectory}>Back</Button>
+          <Button on:click={ascendDirectory}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+            </svg>
+
+          </Button>
         </div>
       {/if}
       {#each Object.keys(currentFiles) as file}

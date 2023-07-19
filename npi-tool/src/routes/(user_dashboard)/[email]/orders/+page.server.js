@@ -4,7 +4,10 @@ import {getAssignedOrders} from "$lib/server/db"
 export async function load({ locals }) {
 
     const { email } = locals;
-    const tableData = await getAssignedOrders(email);
+    let tableList = {};
+    tableList["Build Process"] = await getAssignedOrders(email, "BUILD");
+    tableList["Await FA Approval"] = await getAssignedOrders(email, "AWAIT");
+    tableList["Pilot"] = await getAssignedOrders(email, "PILOT");
 
-    return { email, tableData };
+    return { email, tableList };
 }

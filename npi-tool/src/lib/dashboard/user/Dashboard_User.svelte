@@ -18,7 +18,7 @@
       <TableBodyRow class="divide-y-2 divide-x-2">
         {#each Object.keys(tableData[0]) as column }
           <TableBodyCell class="!px-2 !py-1 !whitespace-normal">
-              {order[column]}
+              {order[column] === -1 ? "LATE" : order[column]}
           </TableBodyCell>
         { /each }
         <List list="none" class="py-4">

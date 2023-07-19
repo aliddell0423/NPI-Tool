@@ -1,7 +1,17 @@
-import { commitTable, makeEngineerAssignment, removeAssignedEngineer, getAssignedEngineers, addOrder} from '$lib/server/db/index.js';
+import { commitTable, makeEngineerAssignment, removeAssignedEngineer, getAssignedEngineers, addOrder, changeOrderStatus} from '$lib/server/db/index.js';
 import { getTimeOff } from '$lib/server/dates/index.js';
 import { createNotification } from '$lib/notifications';
 
+export async function PATCH(requestEvent) {
+
+    const { request } = requestEvent;
+    const body = await request.json();
+    const { status, work_order } = body;
+
+    changeOrderStatus(work_order, status);
+
+    return new Response('Date processed successfully', { status: 200 });
+}
 
 export async function POST(requestEvent) {
 
