@@ -41,6 +41,8 @@
 		"flowbite-svelte": "^0.34.9",
 		"mock-aws-s3": "^4.0.2",
 		"nock": "^13.3.0",
-		"uuid": "^9.0.0"
+		"svelte-gantt": "^4.0.9-beta",
+		"uuid": "^9.0.0",
+		"yootils": "^0.3.1"
 	}
 }

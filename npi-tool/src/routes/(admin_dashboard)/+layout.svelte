@@ -12,13 +12,9 @@
     NPI dashboard for {first_name} {last_name}
   </title>
 </head>
-
-<h1>Admin Dashboard</h1>
-
 <div class="space-y-8">
     <slot/>
 
 <Navbar {notifications}/>
 
-<p>Your role is {roles}</p>
 </div>

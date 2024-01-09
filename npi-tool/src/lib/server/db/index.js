@@ -94,16 +94,29 @@ export function deleteSession(sid) {
   stmnt.run({ sid });
 }
 
-
-export async function getOrders() {
+export async function getAllOrders() {
   const stmnt = db.prepare(
     `select organization, type, customer_name, 
     assembly, sales_order, work_order, order_quantity, region, 
     start_date, est_complete_date, comments, stock_number, 
-    solutions_architect from orders where build_status not like '%PILOT%'`
+    solutions_architect from orders`
   );
 
   const result = stmnt.all();
+
+  return result;
+}
+
+
+export async function getOrders(status) {
+  const stmnt = db.prepare(
+    `select organization, type, customer_name, 
+    assembly, sales_order, work_order, order_quantity, region, 
+    start_date, est_complete_date, comments, stock_number, 
+    solutions_architect, db_order_id from orders where build_status like $status`
+  );
+
+  const result = stmnt.all({ status: `%${status}%` });
 
   return result;
 }
@@ -113,11 +126,24 @@ export async function getAssignedOrders(email, status) {
   const stmnt = db.prepare(`select  organization, type, customer_name, 
     assembly, sales_order, work_order, order_quantity, region, 
     start_date, est_complete_date, comments, stock_number, 
-    solutions_architect from orders
-    join engineer_orders on orders.work_order = engineer_orders.engineer_work_order and orders.build_status like $status 
+    solutions_architect, on_hold, bp_comp_date, bp_comp_percent from orders
+    join engineer_orders on orders.db_order_id = engineer_orders.engineer_order_db_id and orders.build_status like $status 
     where engineer_orders.engineer_email = $email`)
 
   const result = stmnt.all({ status: `%${status}%`, email });
+  return result;
+}
+
+export async function getAllAssignedOrders(email) {
+
+  const stmnt = db.prepare(`select  organization, type, customer_name, 
+    assembly, sales_order, work_order, order_quantity, region, 
+    start_date, est_complete_date, comments, stock_number, 
+    solutions_architect, on_hold, bp_comp_date, bp_comp_percent from orders
+    join engineer_orders on orders.db_order_id = engineer_orders.engineer_order_db_id
+    where engineer_orders.engineer_email = $email`)
+
+  const result = stmnt.all({ email });
   return result;
 }
 
@@ -128,22 +154,31 @@ export async function changeOrderStatus(work_order, status) {
   stmnt.run({ status, work_order });
 }
 
-export async function removeAssignedEngineer(engineer_email, engineer_work_order) {
-  const stmnt = db.prepare("delete from engineer_orders where engineer_email = $engineer_email and engineer_work_order = $engineer_work_order");
-  stmnt.run({engineer_email, engineer_work_order});
+export async function changeOrderAttributes(work_order, comp_date, completion, hold) {
+  const stmnt = db.prepare(`update orders set bp_comp_date = $comp_date, 
+                            bp_comp_percent = $completion,
+                            on_hold = $hold
+                            where work_order = $work_order`);
+
+  stmnt.run({ comp_date, completion, hold, work_order });
+}
+
+export async function removeAssignedEngineer(engineer_email, engineer_order_db_id, engineer_work_order) {
+  const stmnt = db.prepare("delete from engineer_orders where engineer_email = $engineer_email and engineer_order_db_id = $engineer_order_db_id");
+  stmnt.run({engineer_email, engineer_order_db_id});
   console.log(`removed ${engineer_email} from work order ${engineer_work_order}`)
 }
 
-export async function makeEngineerAssignment(engineer_email, engineer_work_order) {
-  const stmnt = db.prepare("insert into engineer_orders (engineer_email, engineer_work_order) values ($engineer_email, $engineer_work_order)");
-  stmnt.run({engineer_email, engineer_work_order});
+export async function makeEngineerAssignment(engineer_email, engineer_order_db_id, engineer_work_order) {
+  const stmnt = db.prepare("insert into engineer_orders (engineer_email, engineer_order_db_id) values ($engineer_email, $engineer_order_db_id)");
+  stmnt.run({engineer_email, engineer_order_db_id});
   console.log(`assigned ${engineer_email} to work order ${engineer_work_order}`)
 }
 
-export async function getAssignedEngineers(engineer_work_order) {
-  const stmnt = db.prepare('select engineer_email from engineer_orders where engineer_work_order = $engineer_work_order')
-
-  const result = stmnt.all({ engineer_work_order });
+export async function getAssignedEngineers(engineer_order_db_id) {
+  const stmnt = db.prepare('select engineer_email from engineer_orders where engineer_order_db_id = $id')
+  const id = parseInt(engineer_order_db_id);
+  const result = stmnt.all({ id });
   return result;
 }
 

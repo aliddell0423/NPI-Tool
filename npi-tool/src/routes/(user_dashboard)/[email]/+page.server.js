@@ -6,7 +6,7 @@ import { countBusinessDays } from '$lib/server/dates';
 
 export async function load() {
 
-	const orders = await getOrders();
+	const orders = await getOrders("BUILD");
 
 	const tableData = [];
 	const assignmentData = {};
@@ -26,6 +26,8 @@ export async function load() {
 		};
 		tableData.push(newRow);
 	}
+
+	console.log(assignmentData);
 
 
 	return { tableData, assignmentData, engineer_dict };

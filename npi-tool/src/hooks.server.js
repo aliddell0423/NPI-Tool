@@ -31,7 +31,7 @@ export const handle = (async ({ event, resolve }) => {
     }
     
 
-    if (!sessionFound && emailPath !== 'login' && emailPath != 'register' && emailPath != 'notif-api') {
+    if (!sessionFound && emailPath !== 'login' && emailPath != 'register' && emailPath != 'api') {
         throw redirect(303, '/login');
     }
 

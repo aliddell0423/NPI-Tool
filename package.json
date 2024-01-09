@@ -8,6 +8,7 @@
     "flowbite": "^1.6.5",
     "flowbite-svelte": "^0.34.10",
     "sqlite": "^4.1.2",
-    "sqlite3": "^5.1.6"
+    "sqlite3": "^5.1.6",
+    "type": "module"
   }
 }

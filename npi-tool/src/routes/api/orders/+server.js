@@ -1,4 +1,4 @@
-import { commitTable, makeEngineerAssignment, removeAssignedEngineer, getAssignedEngineers, addOrder, changeOrderStatus} from '$lib/server/db/index.js';
+import { commitTable, makeEngineerAssignment, removeAssignedEngineer, getAssignedEngineers, addOrder, changeOrderStatus, changeOrderAttributes} from '$lib/server/db/index.js';
 import { getTimeOff } from '$lib/server/dates/index.js';
 import { createNotification } from '$lib/notifications';
 
@@ -10,6 +10,17 @@ export async function PATCH(requestEvent) {
 
     changeOrderStatus(work_order, status);
 
+    return new Response('Date processed successfully', { status: 200 });
+}
+
+
+export async function OPTIONS(requestEvent) {
+    const { request } = requestEvent;
+    const body = await request.json();
+    const { work_order, comp_date, completion, hold } = body;
+
+    changeOrderAttributes(work_order, comp_date, completion, hold);
+    
     return new Response('Date processed successfully', { status: 200 });
 }
 
@@ -44,10 +55,10 @@ export async function PUT(requestEvent) {
 
 async function commitAssignments(assignmentData, tableData, adminEmail) {
 
-    for(const work_order of Object.keys(assignmentData) ) {
-        const futureAssignments = assignmentData[work_order];
-        const currentAssignments = await getAssignedEngineers(work_order);
-        const dates = findRangeDates(tableData, work_order);
+    for(const db_order_id of Object.keys(assignmentData) ) {
+        const futureAssignments = assignmentData[db_order_id];
+        const currentAssignments = await getAssignedEngineers(db_order_id);
+        const dates = findRangeDates(tableData, db_order_id);
         
         const assignments = futureAssignments.filter(item => !currentAssignments.some(obj => obj.engineer_email === item.engineer_email));
         const removals = currentAssignments.filter(item => !futureAssignments.some(obj => obj.engineer_email === item.engineer_email));
@@ -67,12 +78,12 @@ async function commitAssignments(assignmentData, tableData, adminEmail) {
         }
         
         for(const email of assignments ) {
-            makeEngineerAssignment(email["engineer_email"], work_order);
-            createNotification(`You have been assigned WO: ${work_order}`, email["engineer_email"]);
+            makeEngineerAssignment(email["engineer_email"], db_order_id);
+            createNotification(`You have been assigned a new work order`, email["engineer_email"]);
         }
         for(const email of removals ) {
-            removeAssignedEngineer(email["engineer_email"], work_order);
-            createNotification(`You have been removed from WO: ${work_order}`, email["engineer_email"]);
+            removeAssignedEngineer(email["engineer_email"], db_order_id);
+            createNotification(`You have been removed from a work order`, email["engineer_email"]);
         }
 
     }
@@ -104,10 +115,10 @@ function isInTimeOff(dates, timeOff) {
     return null;
 }
 
-function findRangeDates(tableData, work_order) {
+function findRangeDates(tableData, db_id) {
     let selectedOrder;
     for( const order of tableData ) {
-        if(order.work_order === work_order) {
+        if(order.db_order_id == db_id) {
             selectedOrder = order
         }
     }

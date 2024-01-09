@@ -29,13 +29,13 @@
     
   }
 
-  export function editAssignments(work_order) {
+  export function editAssignments(db_id) {
     if(!editSelection){
-      for(const obj of assignmentData[work_order]) {
+      for(const obj of assignmentData[db_id]) {
         selectionList.push(obj["engineer_email"]);
       }
       editSelection = true;
-      currentlySelected = work_order;
+      currentlySelected = db_id;
     }
   }
 
@@ -64,7 +64,9 @@
     <Table class="!min-w-full" shadow>
       <TableHead>
         { #each Object.keys(tableData[0]) as column }
+        {#if column !== "db_order_id"}
           <TableHeadCell class="px-3 py-2">{column.replace(/_/g, " ")}</TableHeadCell>
+        {/if}
         { /each }
         <TableHeadCell>
           Assigned Engineers
@@ -74,6 +76,7 @@
         {#each tableData as order}
         <TableBodyRow class="divide-y-2 divide-x-2">
           {#each Object.keys(tableData[0]) as column }
+          {#if column !== "db_order_id"}
             <TableBodyCell class="!px-2 !py-1 !whitespace-normal">
               {#if editMode}
                 <Input type="text" bind:value={order[column]}/>
@@ -81,12 +84,13 @@
                 {order[column] === -1 ? "LATE": order[column]}
               {/if}
             </TableBodyCell>
+          {/if}
           { /each }
           <List list="none" class="py-4">
-            {#if assignmentData[order["work_order"]].length}
-              {#each assignmentData[order["work_order"]] as email}
+            {#if assignmentData[order["db_order_id"]].length}
+              {#each assignmentData[order["db_order_id"]] as email}
                 {#if editMode}
-                  <p class="cursor-pointer" on:click={() => editAssignments(order["work_order"])}>{engineer_dict[email["engineer_email"]]}</p> 
+                  <p class="cursor-pointer" on:click={() => editAssignments(order["db_order_id"])}>{engineer_dict[email["engineer_email"]]}</p> 
                 {:else}
                   <Li>
                     {engineer_dict[email["engineer_email"]]}
@@ -95,7 +99,7 @@
               {/each}
             {:else}
               {#if editMode}
-                <p class="cursor-pointer" on:click={() => editAssignments(order["work_order"])}>TBD</p>
+                <p class="cursor-pointer" on:click={() => editAssignments(order["db_order_id"])}>TBD</p>
               {:else}
                 <p>TBD</p>
               {/if}

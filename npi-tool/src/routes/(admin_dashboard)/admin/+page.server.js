@@ -6,7 +6,7 @@ import { countBusinessDays } from '$lib/server/dates';
 
 export async function load({ locals }) {
 
-	const orders = await getOrders();
+	const orders = await getOrders("BUILD");
 	const adminEmail = locals.email
 
 	const tableData = [];
@@ -17,9 +17,9 @@ export async function load({ locals }) {
 		const days_remaining = await countBusinessDays(Date(), order["est_complete_date"]);
 		const working_days = await countBusinessDays(order["start_date"], order["est_complete_date"]);
 
-		const assigned_engineers = await getAssignedEngineers(order["work_order"]);
+		const assigned_engineers = await getAssignedEngineers(order["db_order_id"]);
 
-		assignmentData[order["work_order"]] = assigned_engineers;
+		assignmentData[order["db_order_id"]] = assigned_engineers;
 
 		const newRow = {...order, 
 			"days_remaining": days_remaining, 
