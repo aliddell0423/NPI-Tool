@@ -31,3 +31,6 @@ Welcome to my scheduling application built with SvelteKit! This application allo
    ```bash
    npm install
 
+4. Run the application:
+   ```bash
+   npm run dev
